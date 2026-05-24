@@ -3,7 +3,7 @@ import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native
 
 import { colors, radius, typography } from '@/lib/theme';
 import type { PressableState } from '@/lib/pressable';
-import type { Venture } from '@/lib/mockData';
+import type { Venture } from '@/lib/types';
 
 type VenturePickerProps = {
   ventures: Venture[];

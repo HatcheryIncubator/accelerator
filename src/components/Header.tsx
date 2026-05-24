@@ -15,6 +15,13 @@ type HeaderProps = {
 export function Header({ title, showBack = true, right }: HeaderProps) {
   const router = useRouter();
 
+  function goBack() {
+    // On a fresh load / page refresh there's no history to pop, which throws
+    // "GO_BACK was not handled". Fall back to the home hub in that case.
+    if (router.canGoBack()) router.back();
+    else router.replace('/home');
+  }
+
   return (
     <View style={styles.bar}>
       <View style={styles.inner}>
@@ -23,7 +30,7 @@ export function Header({ title, showBack = true, right }: HeaderProps) {
             accessibilityRole="button"
             accessibilityLabel="Go back"
             hitSlop={8}
-            onPress={() => router.back()}
+            onPress={goBack}
             style={styles.backButton}>
             <Ionicons name="chevron-back" size={24} color={colors.surface} />
           </Pressable>

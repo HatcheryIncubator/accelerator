@@ -16,6 +16,7 @@ export const colors = {
   text: '#1a1a1a',
   muted: '#6b6b6b',
   border: '#e0e0e0',
+  error: '#A64141',
 } as const;
 
 export const spacing = {

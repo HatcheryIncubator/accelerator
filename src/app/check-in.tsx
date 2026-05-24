@@ -1,53 +1,77 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { Screen } from '@/components/Screen';
 import { TextButton } from '@/components/TextButton';
 import { TextField } from '@/components/TextField';
 import { VenturePicker } from '@/components/VenturePicker';
-import { mockVentures } from '@/lib/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { colors, radius, typography } from '@/lib/theme';
-import type { PressableState } from '@/lib/pressable';
 
 export default function CheckInScreen() {
   const router = useRouter();
-  const [showPicker, setShowPicker] = useState(false);
-  const [ventureId, setVentureId] = useState<string | null>(null);
+  const { participant, participantVentures } = useAuth();
 
-  function confirmCheckIn() {
-    // TODO: wire to Supabase — open a new session for the selected venture.
-    router.push('/home');
+  const multiple = participantVentures.length > 1;
+  const [ventureId, setVentureId] = useState<string | null>(participantVentures[0]?.id ?? null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const heading = multiple
+    ? 'Which venture are you working on?'
+    : `Working on ${participantVentures[0]?.name ?? 'your venture'}?`;
+
+  async function confirmCheckIn() {
+    const effectiveVentureId = ventureId ?? participantVentures[0]?.id;
+    if (!participant || !effectiveVentureId) {
+      setError('Please choose a venture.');
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const { error: insertError } = await supabase.from('sessions').insert({
+        participant_id: participant.id,
+        venture_id: effectiveVentureId,
+        check_in_at: new Date().toISOString(),
+      });
+      if (insertError) throw insertError;
+      router.replace('/home');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not check in.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <Screen title="Check In">
-      <Text style={styles.heading}>Working on Acme Co?</Text>
+      <Text style={styles.heading}>{heading}</Text>
       <Text style={styles.subtext}>We&apos;ll start a session right now.</Text>
 
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => setShowPicker((v) => !v)}
-        style={({ pressed, hovered }: PressableState) => [
-          styles.toggle,
-          (pressed || (Platform.OS === 'web' && hovered)) && styles.toggleActive,
-        ]}>
-        <Text style={styles.toggleText}>＋ Working on a different venture?</Text>
-      </Pressable>
-
-      {showPicker && (
-        <TextField label="Choose a venture">
+      {multiple && (
+        <TextField label="Venture">
           <VenturePicker
-            ventures={mockVentures}
+            ventures={participantVentures}
             selectedId={ventureId}
             onSelect={setVentureId}
           />
         </TextField>
       )}
 
-      <PrimaryButton label="Confirm Check In" onPress={confirmCheckIn} />
-      <TextButton label="Cancel" onPress={() => router.push('/home')} />
+      {error && <Text style={styles.error}>{error}</Text>}
+
+      {submitting ? (
+        <View style={styles.busy}>
+          <ActivityIndicator color={colors.surface} />
+        </View>
+      ) : (
+        <PrimaryButton label="Confirm Check In" onPress={confirmCheckIn} />
+      )}
+      <TextButton label="Cancel" onPress={() => router.replace('/home')} />
     </Screen>
   );
 }
@@ -61,20 +85,16 @@ const styles = StyleSheet.create({
     ...typography.subtext,
     color: colors.muted,
   },
-  toggle: {
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#aaa',
-    borderRadius: radius,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  toggleActive: {
-    opacity: 0.7,
-  },
-  toggleText: {
+  error: {
     ...typography.subtext,
-    color: colors.blueBright,
+    color: colors.error,
+  },
+  busy: {
+    width: '100%',
+    height: 56,
+    borderRadius: radius,
+    backgroundColor: colors.blueDeep,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
