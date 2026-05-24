@@ -43,7 +43,8 @@ function fullName(p: { first_name: string | null; last_name: string | null } | n
 export async function fetchParticipantCount(): Promise<number> {
   const { count, error } = await supabase
     .from('participants')
-    .select('*', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true })
+    .eq('role', 'participant');
   if (error) throw error;
   return count ?? 0;
 }
