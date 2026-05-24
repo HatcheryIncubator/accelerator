@@ -1,63 +1,57 @@
-import * as Device from 'expo-device';
-import { Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { Screen } from '@/components/Screen';
+import { SecondaryButton } from '@/components/SecondaryButton';
+import { TextField } from '@/components/TextField';
+import { colors, typography } from '@/lib/theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function LookupScreen() {
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+
+  // TODO: wire to Supabase — search participants by name using `query`.
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <Screen title="Hatchery Check-In" showBack={false}>
+      <Text style={styles.welcome}>Welcome 👋</Text>
+      <Text style={styles.subtext}>Find your name to get started.</Text>
+
+      <TextField
+        label="Your name"
+        placeholder="Search by name…"
+        value={query}
+        onChangeText={setQuery}
+        autoCapitalize="words"
+      />
+
+      <PrimaryButton label="Continue" onPress={() => router.push('/confirm')} />
+
+      <View style={styles.dividerRow}>
+        <Text style={styles.divider}>— or —</Text>
+      </View>
+
+      <SecondaryButton label="I'm new here →" onPress={() => router.push('/register')} />
+    </Screen>
   );
 }
 
-export default function HomeScreen() {
-  return (
-    <ThemedView className="flex-1 flex-row justify-center">
-      <SafeAreaView className="flex-1 max-w-content items-center gap-three px-four pb-three ios:pb-[66px] android:pb-[96px]">
-        <ThemedView className="flex-1 items-center justify-center gap-four px-four">
-          <AnimatedIcon />
-          <ThemedText type="title" className="text-center">
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" className="uppercase">
-          get started
-        </ThemedText>
-
-        <ThemedView
-          type="backgroundElement"
-          className="gap-three self-stretch rounded-four px-three py-four">
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
+const styles = StyleSheet.create({
+  welcome: {
+    ...typography.display,
+    color: colors.blueDeep,
+  },
+  subtext: {
+    ...typography.subtext,
+    color: colors.muted,
+  },
+  dividerRow: {
+    alignItems: 'center',
+  },
+  divider: {
+    ...typography.subtext,
+    color: colors.muted,
+  },
+});

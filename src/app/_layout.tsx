@@ -1,18 +1,31 @@
-import '@/global.css';
-import '@/lib/nativewind-interop';
+import "@/global.css";
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import {
+  OpenSans_400Regular,
+  OpenSans_600SemiBold,
+  OpenSans_700Bold,
+  useFonts,
+} from "@expo-google-fonts/open-sans";
+import { Stack } from "expo-router";
+import { Platform } from "react-native";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { UserProvider } from "@/contexts/UserContext";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    OpenSans_400Regular,
+    OpenSans_600SemiBold,
+    OpenSans_700Bold,
+  });
+
+  // On native, hold render until fonts are ready to avoid a font swap flash.
+  // On web (primary target) render immediately so the static export contains
+  // real content (no blank pre-render); Open Sans swaps in when it loads.
+  if (!fontsLoaded && Platform.OS !== "web") return null;
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <UserProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </UserProvider>
   );
 }
