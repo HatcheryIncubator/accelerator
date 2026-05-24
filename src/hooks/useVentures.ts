@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { supabase } from '@/lib/supabase';
-import type { Venture } from '@/lib/types';
+import type { Venture } from '@/types';
 
 /** Fetches all ventures (ordered by name) for pickers and id→name lookups. */
 export function useVentures() {

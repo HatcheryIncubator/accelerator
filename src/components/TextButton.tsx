@@ -1,7 +1,7 @@
 import { Platform, Pressable, StyleSheet, Text } from 'react-native';
 
 import { colors, typography } from '@/lib/theme';
-import type { PressableState } from '@/lib/pressable';
+import type { PressableState } from '@/types';
 
 type TextButtonProps = {
   label: string;

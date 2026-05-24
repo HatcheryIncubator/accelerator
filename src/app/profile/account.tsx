@@ -10,13 +10,13 @@ import { TextField } from '@/components/TextField';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, typography } from '@/lib/theme';
-import type { PressableState } from '@/lib/pressable';
+import type { PressableState } from '@/types';
 
 const MIN_PASSWORD = 8;
 
 export default function AccountScreen() {
   const router = useRouter();
-  const { participant, signOut } = useAuth();
+  const { participant } = useAuth();
 
   // --- Change email ---
   const [email, setEmail] = useState('');
@@ -98,8 +98,10 @@ export default function AccountScreen() {
     try {
       const { error } = await supabase.rpc('delete_own_account');
       if (error) throw error;
-      // The auth user is gone; clear the local session and let the gate route to login.
-      await signOut().catch(() => {});
+      // The auth user no longer exists, so a server-side revoke would just fail
+      // (and leaves a stale token that the background refresh chokes on). Clear
+      // the session locally instead; the SIGNED_OUT event routes us to login.
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
       router.replace('/login');
     } catch (e) {
       setDeleteError(e instanceof Error ? e.message : 'Could not delete your account.');

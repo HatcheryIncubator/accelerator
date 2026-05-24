@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
 import { colors, radius, typography } from '@/lib/theme';
@@ -11,6 +11,9 @@ type TextFieldProps = TextInputProps & {
 
 export function TextField({ label, children, style, ...inputProps }: TextFieldProps) {
   const [focused, setFocused] = useState(false);
+  // Web autofill needs a stable id on the rendered <input>; fall back to a
+  // generated one when a call site doesn't pass a semantic id/nativeID.
+  const generatedId = useId();
 
   return (
     <View style={styles.field}>
@@ -18,6 +21,7 @@ export function TextField({ label, children, style, ...inputProps }: TextFieldPr
       {children ?? (
         <TextInput
           {...inputProps}
+          id={inputProps.id ?? inputProps.nativeID ?? generatedId}
           onFocus={(e) => {
             setFocused(true);
             inputProps.onFocus?.(e);

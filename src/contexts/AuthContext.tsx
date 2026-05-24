@@ -10,7 +10,7 @@ import {
 } from 'react';
 
 import { supabase } from '@/lib/supabase';
-import type { Participant, Venture } from '@/lib/types';
+import type { Participant, Venture } from '@/types';
 
 type SignUpResult = { needsConfirmation: boolean };
 
@@ -98,9 +98,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data, error }) => {
       if (!active) return;
-      void syncForSession(data.session).finally(() => {
+      // A stale/invalid stored session (e.g. after account deletion or an
+      // expired refresh token) makes the background auto-refresh throw
+      // "Invalid Refresh Token". Purge it locally so we settle on signed-out
+      // instead of looping on a failing refresh.
+      if (error) {
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+        if (!active) return;
+      }
+      void syncForSession(error ? null : data.session).finally(() => {
         if (active) setLoading(false);
       });
     });

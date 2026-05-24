@@ -17,8 +17,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDate, formatDuration } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, typography } from '@/lib/theme';
-import type { SessionWithVenture } from '@/lib/types';
-import type { PressableState } from '@/lib/pressable';
+import type { SessionWithVenture } from '@/types';
+import type { PressableState } from '@/types';
 
 /** Confirm dialog that works on web (window.confirm) and native (Alert). */
 function confirmDelete(): Promise<boolean> {

@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { buildSchedule, emptySchedule, scheduleFromSession, type ScheduleState } from '@/lib/schedule';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, typography } from '@/lib/theme';
-import type { Venture } from '@/lib/types';
+import type { Venture } from '@/types';
 
 export default function EditSessionScreen() {
   const router = useRouter();

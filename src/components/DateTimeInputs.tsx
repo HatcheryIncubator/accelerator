@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Platform, StyleSheet, TextInput } from 'react-native';
 
 import { colors, radius } from '@/lib/theme';
@@ -12,9 +13,11 @@ type InputProps = {
 };
 
 export function DateInput({ value, onChange }: InputProps) {
+  const id = useId();
   if (Platform.OS === 'web') {
     return (
       <input
+        id={id}
         type="date"
         value={value}
         onChange={(e) => onChange((e.target as HTMLInputElement).value)}
@@ -34,9 +37,11 @@ export function DateInput({ value, onChange }: InputProps) {
 }
 
 export function TimeInput({ value, onChange }: InputProps) {
+  const id = useId();
   if (Platform.OS === 'web') {
     return (
       <input
+        id={id}
         type="time"
         value={value}
         onChange={(e) => onChange((e.target as HTMLInputElement).value)}

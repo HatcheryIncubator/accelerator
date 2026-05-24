@@ -9,7 +9,7 @@ import { TextButton } from '@/components/TextButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, typography } from '@/lib/theme';
-import { useVentures } from '@/lib/useVentures';
+import { useVentures } from '@/hooks/useVentures';
 
 export default function VenturesScreen() {
   const router = useRouter();

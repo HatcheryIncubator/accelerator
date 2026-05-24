@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatDuration, formatTime } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { colors, radius, typography } from '@/lib/theme';
-import type { SessionWithVenture } from '@/lib/types';
+import type { SessionWithVenture } from '@/types';
 
 export default function CheckOutScreen() {
   const router = useRouter();

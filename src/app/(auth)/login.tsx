@@ -1,61 +1,29 @@
-import { useState } from "react";
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Screen } from "@/components/Screen";
 import { TextField } from "@/components/TextField";
-import { useAuth } from "@/contexts/AuthContext";
 import { colors, radius, typography } from "@/lib/theme";
-import type { PressableState } from "@/lib/pressable";
-
-type Mode = "signin" | "signup";
+import type { PressableState } from "@/types";
+import { useLoginForm } from "@/hooks/useLoginForm";
 
 export default function LoginScreen() {
-  const { signInWithPassword, signUpWithPassword } = useAuth();
-
-  const [mode, setMode] = useState<Mode>("signin");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  function switchMode(next: Mode) {
-    if (next === mode) return;
-    setMode(next);
-    setError(null);
-    setInfo(null);
-  }
-
-  async function onSubmit() {
-    setError(null);
-    setInfo(null);
-    setSubmitting(true);
-    try {
-      if (mode === "signin") {
-        await signInWithPassword(email.trim(), password);
-        // Root gate navigates once the session updates.
-      } else {
-        const { needsConfirmation } = await signUpWithPassword(
-          email.trim(),
-          password,
-          firstName.trim(),
-          lastName.trim(),
-        );
-        if (needsConfirmation) {
-          setInfo("Check your email to confirm your account.");
-        }
-        // If no confirmation needed, the gate routes to /select-venture.
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  const submitLabel = mode === "signin" ? "Sign in" : "Create account";
+  const {
+    mode,
+    switchMode,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    info,
+    submitting,
+    onSubmit,
+    submitLabel,
+  } = useLoginForm();
 
   return (
     <Screen title="Hatchery Check-In" showBack={false} gap={12}>
@@ -68,6 +36,7 @@ export default function LoginScreen() {
         <>
           <TextField
             label="First name"
+            id="given-name"
             placeholder="First name"
             value={firstName}
             onChangeText={setFirstName}
@@ -76,6 +45,7 @@ export default function LoginScreen() {
           />
           <TextField
             label="Last name"
+            id="family-name"
             placeholder="Last name"
             value={lastName}
             onChangeText={setLastName}
@@ -87,6 +57,7 @@ export default function LoginScreen() {
 
       <TextField
         label="Email"
+        id="email"
         placeholder="you@example.edu"
         value={email}
         onChangeText={setEmail}
@@ -97,6 +68,7 @@ export default function LoginScreen() {
       />
       <TextField
         label="Password"
+        id="password"
         placeholder="Password"
         value={password}
         onChangeText={setPassword}

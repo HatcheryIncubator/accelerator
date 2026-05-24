@@ -5,7 +5,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, radius, typography } from '@/lib/theme';
-import type { PressableState } from '@/lib/pressable';
+import type { PressableState } from '@/types';
 
 export default function ProfileScreen() {
   const router = useRouter();

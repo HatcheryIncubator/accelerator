@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, typography } from '@/lib/theme';
-import type { PressableState } from '@/lib/pressable';
-import type { Venture } from '@/lib/types';
+import type { PressableState } from '@/types';
+import type { Venture } from '@/types';
 
 type VenturePickerProps = {
   ventures: Venture[];
@@ -19,11 +19,13 @@ export function VenturePicker({
   placeholder = 'Select a venture…',
 }: VenturePickerProps) {
   const selected = ventures.find((v) => v.id === selectedId) ?? null;
+  const id = useId();
 
   // Web: a real <select> renders/behaves natively and is keyboard-accessible.
   if (Platform.OS === 'web') {
     return (
       <select
+        id={id}
         value={selectedId ?? ''}
         onChange={(e) => onSelect((e.target as HTMLSelectElement).value)}
         style={webSelectStyle}>

@@ -8,8 +8,8 @@ import { VenturePicker } from "@/components/VenturePicker";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { colors, radius, typography } from "@/lib/theme";
-import { useVentures } from "@/lib/useVentures";
-import type { PressableState } from "@/lib/pressable";
+import { useVentures } from "@/hooks/useVentures";
+import type { PressableState } from "@/types";
 
 export default function SelectVentureScreen() {
   const router = useRouter();

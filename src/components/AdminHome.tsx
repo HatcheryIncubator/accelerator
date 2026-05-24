@@ -19,8 +19,8 @@ import {
 } from '@/lib/admin';
 import { formatTime } from '@/lib/format';
 import { colors, radius, typography } from '@/lib/theme';
-import { useVentures } from '@/lib/useVentures';
-import type { PressableState } from '@/lib/pressable';
+import { useVentures } from '@/hooks/useVentures';
+import type { PressableState } from '@/types';
 
 export function AdminHome() {
   const router = useRouter();

@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatTime } from '@/lib/format';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/lib/theme';
-import type { SessionWithVenture } from '@/lib/types';
+import type { SessionWithVenture } from '@/types';
 
 export function ParticipantHome() {
   const router = useRouter();

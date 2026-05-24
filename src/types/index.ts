@@ -1,4 +1,6 @@
-// Database row shapes (snake_case, matching the Supabase schema).
+// Shared types: database row shapes plus cross-cutting UI types.
+
+// ---- Database row shapes (snake_case, matching the Supabase schema) ----
 
 export type Participant = {
   id: string;
@@ -28,4 +30,20 @@ export type Session = {
 /** A session row with the venture name embedded via `select('*, ventures(name)')`. */
 export type SessionWithVenture = Session & {
   ventures: { name: string } | null;
+};
+
+// ---- UI types ----
+
+/** Auth screen toggle between sign-in and sign-up. */
+export type Mode = 'signin' | 'signup';
+
+/**
+ * react-native-web passes `hovered` / `focused` to Pressable's style callback at
+ * runtime, but React Native's core types only declare `pressed`. This type lets
+ * us read those web-only flags without a cast at every call site.
+ */
+export type PressableState = {
+  pressed: boolean;
+  hovered?: boolean;
+  focused?: boolean;
 };
