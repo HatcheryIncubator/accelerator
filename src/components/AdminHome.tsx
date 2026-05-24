@@ -7,8 +7,16 @@ import { HeaderActions } from './HeaderActions';
 
 import { Screen } from '@/components/Screen';
 import { SecondaryButton } from '@/components/SecondaryButton';
+import { WorkTimeChart } from '@/components/WorkTimeChart';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchOpenSessions, fetchParticipantCount, type OpenSession } from '@/lib/admin';
+import {
+  cumulativeByDay,
+  fetchAllSessions,
+  fetchOpenSessions,
+  fetchParticipantCount,
+  type CumulativePoint,
+  type OpenSession,
+} from '@/lib/admin';
 import { formatTime } from '@/lib/format';
 import { colors, radius, typography } from '@/lib/theme';
 import { useVentures } from '@/lib/useVentures';
@@ -21,6 +29,7 @@ export function AdminHome() {
 
   const [openSessions, setOpenSessions] = useState<OpenSession[]>([]);
   const [participantCount, setParticipantCount] = useState(0);
+  const [workTime, setWorkTime] = useState<CumulativePoint[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,9 +37,14 @@ export function AdminHome() {
     setLoadingData(true);
     setError(null);
     try {
-      const [open, count] = await Promise.all([fetchOpenSessions(), fetchParticipantCount()]);
+      const [open, count, allSessions] = await Promise.all([
+        fetchOpenSessions(),
+        fetchParticipantCount(),
+        fetchAllSessions(),
+      ]);
       setOpenSessions(open);
       setParticipantCount(count);
+      setWorkTime(cumulativeByDay(allSessions));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load admin data.');
     } finally {
@@ -61,6 +75,8 @@ export function AdminHome() {
             <Stat value={ventures.length} label="Ventures" />
             <Stat value={openSessions.length} label="Checked in" />
           </View>
+
+          <WorkTimeChart points={workTime} />
 
           <Text style={styles.sectionLabel}>Checked in now</Text>
           {openSessions.length === 0 ? (

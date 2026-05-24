@@ -85,6 +85,16 @@ export async function fetchVentureName(ventureId: string): Promise<string | null
   return (data as { name: string } | null)?.name ?? null;
 }
 
+/** Every session across all ventures (admin RLS required), oldest first. */
+export async function fetchAllSessions(): Promise<VentureSession[]> {
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('check_in_at, check_out_at, participant_id')
+    .order('check_in_at', { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as VentureSession[];
+}
+
 export async function fetchVentureSessions(ventureId: string): Promise<VentureSession[]> {
   const { data, error } = await supabase
     .from('sessions')
@@ -133,4 +143,47 @@ export function perDay(sessions: VentureSession[]): DayStat[] {
   return [...map.entries()]
     .sort((a, b) => b[0].localeCompare(a[0]))
     .map(([date, v]) => ({ date, label: v.label, minutes: v.minutes, count: v.count }));
+}
+
+export type CumulativePoint = { date: string; label: string; hours: number };
+
+/**
+ * Running total of completed-session hours, one point per calendar day from the
+ * first session to the last. Gaps are filled (flat) so the line is continuous
+ * and ready to share an x-axis with per-venture series later. Dates are handled
+ * in local time to match `isoToDateInput`.
+ */
+export function cumulativeByDay(
+  sessions: { check_in_at: string; check_out_at: string | null }[],
+): CumulativePoint[] {
+  const byDay = new Map<string, number>();
+  for (const s of sessions) {
+    if (!s.check_out_at) continue;
+    const key = isoToDateInput(s.check_in_at);
+    byDay.set(key, (byDay.get(key) ?? 0) + sessionMinutes(s));
+  }
+  if (byDay.size === 0) return [];
+
+  const keys = [...byDay.keys()].sort();
+  const [sy, sm, sd] = keys[0].split('-').map(Number);
+  const [ey, em, ed] = keys[keys.length - 1].split('-').map(Number);
+  const cursor = new Date(sy, sm - 1, sd);
+  const end = new Date(ey, em - 1, ed);
+
+  const points: CumulativePoint[] = [];
+  let cumMinutes = 0;
+  while (cursor <= end) {
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, '0');
+    const d = String(cursor.getDate()).padStart(2, '0');
+    const key = `${y}-${m}-${d}`;
+    cumMinutes += byDay.get(key) ?? 0;
+    points.push({
+      date: key,
+      label: cursor.toLocaleDateString([], { month: 'short', day: 'numeric' }),
+      hours: cumMinutes / 60,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return points;
 }
