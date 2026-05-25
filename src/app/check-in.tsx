@@ -79,7 +79,7 @@ export default function CheckInScreen() {
 const styles = StyleSheet.create({
   heading: {
     ...typography.heading,
-    color: colors.blueDeep,
+    color: colors.gold, // Emory gold H1
   },
   subtext: {
     ...typography.subtext,
