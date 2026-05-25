@@ -53,7 +53,7 @@ function KpiStrip({ data, mobile }: { data: AdminDashboardData; mobile: boolean 
       <KpiTile label="Participants" value={kpis.participants} />
       <KpiTile label="Avg hrs/wk per venture" value={`${kpis.avgWeeklyHoursPerVenture}h`} hint="target ~40h" />
       <KpiTile label="Checked in now" value={kpis.checkedInNow} tone="active" />
-      <KpiTile label="Active ventures" value={active} hint="this week" />
+      <KpiTile label="Active ventures" value={active} />
     </View>
   );
 }

@@ -148,10 +148,11 @@ export function useAdminDashboard(range: DateRange): AdminDashboardData {
     const roster = participants.filter((p) => p.role === 'participant');
     const ventureName = new Map(ventures.map((v) => [v.id, v.name]));
 
-    // Active ventures: distinct ventures with a check-in in the last 7 days.
-    const weekAgo = now - 7 * DAY_MS;
-    const recent = rangeSessions.filter((s) => new Date(s.check_in_at).getTime() >= weekAgo);
-    const activeVentureIds = new Set(recent.map((s) => s.venture_id).filter((id) => ventureName.has(id)));
+    // Active ventures: distinct ventures with any check-in within the selected
+    // range (so "Cohort to date" counts every venture that's ever been active).
+    const activeVentureIds = new Set(
+      rangeSessions.map((s) => s.venture_id).filter((id) => ventureName.has(id)),
+    );
     const activeVentures = { active: activeVentureIds.size, total: ventures.length };
 
     // Last-seen per participant (seenRows is newest-first, so first hit = max).
