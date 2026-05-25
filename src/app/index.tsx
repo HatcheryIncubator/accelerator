@@ -1,7 +1,10 @@
 import { Redirect } from "expo-router";
 
-// The root AuthGate handles unauthenticated / no-venture redirects; an authed
-// user with a venture lands on /home from here.
+import { useAuth } from "@/contexts/AuthContext";
+
+// The root AuthGate handles unauthenticated / no-venture redirects. For an authed
+// user we route by role: admins to the dashboard, participants home.
 export default function Index() {
-  return <Redirect href="/home" />;
+  const { participant } = useAuth();
+  return <Redirect href={participant?.role === "admin" ? "/admin" : "/home"} />;
 }

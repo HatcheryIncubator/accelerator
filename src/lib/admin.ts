@@ -26,6 +26,16 @@ export type VentureSession = {
   participant_id: string;
 };
 
+/** An open session enriched for the admin dashboard "Here right now" list. */
+export type OpenSessionDetail = {
+  id: string;
+  check_in_at: string;
+  participant_id: string;
+  firstName: string | null;
+  lastName: string | null;
+  ventureName: string;
+};
+
 export type DayStat = { date: string; label: string; minutes: number; count: number };
 
 // PostgREST embeds a to-one relation as an object; supabase-js types it as an
@@ -62,6 +72,27 @@ export async function fetchOpenSessions(): Promise<OpenSession[]> {
     participantName: fullName(one(r.participants)),
     ventureName: one<{ name: string }>(r.ventures)?.name ?? 'Unknown venture',
   }));
+}
+
+/** Open sessions with participant id + name parts (for avatars) and venture name. */
+export async function fetchOpenSessionsForDashboard(): Promise<OpenSessionDetail[]> {
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('id, check_in_at, participant_id, participants(first_name, last_name), ventures(name)')
+    .is('check_out_at', null)
+    .order('check_in_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((r: any) => {
+    const p = one<{ first_name: string | null; last_name: string | null }>(r.participants);
+    return {
+      id: r.id,
+      check_in_at: r.check_in_at,
+      participant_id: r.participant_id,
+      firstName: p?.first_name ?? null,
+      lastName: p?.last_name ?? null,
+      ventureName: one<{ name: string }>(r.ventures)?.name ?? 'Unknown venture',
+    };
+  });
 }
 
 export async function fetchRecentSessions(limit = 100): Promise<AdminSessionRow[]> {

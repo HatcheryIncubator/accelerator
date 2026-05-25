@@ -60,9 +60,9 @@ function AuthGate() {
   }
 
   // 5) Fully authed (admin, or a participant with a venture). If parked in
-  //    (auth), go home.
+  //    (auth), send admins to the dashboard and participants home.
   if (participant && !needsVenture && inAuthGroup) {
-    return <Redirect href="/home" />;
+    return <Redirect href={participant.role === "admin" ? "/admin" : "/home"} />;
   }
 
   return null;

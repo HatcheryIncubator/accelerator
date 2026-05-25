@@ -6,17 +6,28 @@ import type { TextStyle } from 'react-native';
  */
 
 export const colors = {
-  blue: '#012169',
-  blueDeep: '#0c2340',
-  blueBright: '#007dba',
-  gold: '#f2a900',
-  goldBg: '#fff8e6',
-  bodyBg: '#fafafa',
+  blue: '#002878', // Emory primary navy — buttons, header, links, focus
+  blueDeep: '#001d5c', // darker navy — pressed states, title accents
+  blueBright: '#6384c6', // Emory accent blue — charts, status text
+  gold: '#c79000', // Emory gold — H1 headings, accent stripes
+  goldBg: '#fbf9ed', // Emory cream — status card background
+  bodyBg: '#fcfcfc',
   surface: '#ffffff',
-  text: '#1a1a1a',
-  muted: '#6b6b6b',
-  border: '#e0e0e0',
+  text: '#333333', // Emory default body/heading text
+  muted: '#666666', // Emory secondary text / H2
+  border: '#ededed',
   error: '#A64141',
+  // Admin dashboard — semantic status + chart palette.
+  statusActive: '#1D9E75', // green — checked in / active now
+  statusActiveBg: '#E1F5EE',
+  statusQuiet: '#854F0B', // amber — quiet 7–13 days
+  statusQuietBg: '#FAEEDA',
+  statusAtRisk: '#A32D2D', // red — quiet 14+ days / never seen
+  statusAtRiskBg: '#FCEBEB',
+  chartBar: '#185FA5',
+  chartBarLight: '#B5D4F4',
+  // Heatmap intensity ramp (low → high).
+  heatmap: ['#F1EFE8', '#E6F1FB', '#B5D4F4', '#378ADD', '#185FA5'],
 } as const;
 
 export const spacing = {
