@@ -9,6 +9,7 @@ import {
 } from '@/lib/admin';
 import { useNow } from '@/hooks/useNow';
 import { supabase } from '@/lib/supabase';
+import { ventureDisplayName } from '@/lib/ventureNames';
 import type { Participant, Venture } from '@/types';
 
 export type DateRange = 'last7' | 'last30' | 'cohort';
@@ -29,7 +30,30 @@ export type QuietItem = {
   bucket: 'quiet' | 'atRisk';
 };
 
-export type HoursByVenture = { ventureId: string; name: string; hours: number };
+/** One person's completed hours on a venture (or the merged "+others" slot). */
+export type VentureContributor = { participantId: string; name: string; hours: number };
+
+export type HoursByVenture = {
+  ventureId: string;
+  name: string;
+  displayName: string; // short name for long titles — see lib/ventureNames
+  hours: number; // total, == sum of `contributors` hours (kept consistent for the stacked bar)
+  // Sorted by hours desc, capped at MAX_VENTURE_SEGMENTS; the last entry is
+  // "+others" when the venture has more contributors than will fit as segments.
+  contributors: VentureContributor[];
+};
+
+// Top N contributors shown as discrete segments; the rest collapse into "+others".
+const MAX_VENTURE_SEGMENTS = 5;
+
+function mergeContributors(sorted: VentureContributor[]): VentureContributor[] {
+  if (sorted.length <= MAX_VENTURE_SEGMENTS) return sorted;
+  const head = sorted.slice(0, MAX_VENTURE_SEGMENTS - 1);
+  const others = sorted
+    .slice(MAX_VENTURE_SEGMENTS - 1)
+    .reduce((sum, c) => sum + c.hours, 0);
+  return [...head, { participantId: '+others', name: '+others', hours: others }];
+}
 
 export type WeekPoint = { weekStart: string; label: string; count: number; avg: number };
 
@@ -170,13 +194,49 @@ export function useAdminDashboard(range: DateRange): AdminDashboardData {
       .filter((q) => q.daysAgo > 7)
       .sort((a, b) => b.daysAgo - a.daysAgo);
 
-    // Hours by venture (completed only — sessionMinutes returns 0 for open).
-    const minutesByVenture = new Map<string, number>();
+    // Hours by venture, broken down per participant (completed only —
+    // sessionMinutes returns 0 for open sessions). Minutes accumulate per
+    // (venture, participant) pair, then round to hours once at the end.
+    const personName = new Map<string, string>();
+    for (const p of participants) {
+      personName.set(
+        p.id,
+        `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || p.email || 'Unknown',
+      );
+    }
+    const minutesByVenturePerson = new Map<string, Map<string, number>>();
     for (const s of rangeSessions) {
-      minutesByVenture.set(s.venture_id, (minutesByVenture.get(s.venture_id) ?? 0) + sessionMinutes(s));
+      const m = sessionMinutes(s);
+      if (m <= 0) continue;
+      let inner = minutesByVenturePerson.get(s.venture_id);
+      if (!inner) {
+        inner = new Map();
+        minutesByVenturePerson.set(s.venture_id, inner);
+      }
+      inner.set(s.participant_id, (inner.get(s.participant_id) ?? 0) + m);
     }
     const hoursByVenture: HoursByVenture[] = ventures
-      .map((v) => ({ ventureId: v.id, name: v.name, hours: Math.round((minutesByVenture.get(v.id) ?? 0) / 60) }))
+      .map((v) => {
+        const inner = minutesByVenturePerson.get(v.id);
+        const contributors = mergeContributors(
+          [...(inner?.entries() ?? [])]
+            .map(([pid, min]) => ({
+              participantId: pid,
+              name: personName.get(pid) ?? 'Unknown',
+              hours: Math.round(min / 60),
+            }))
+            .filter((c) => c.hours > 0)
+            .sort((a, b) => b.hours - a.hours),
+        );
+        const hours = contributors.reduce((sum, c) => sum + c.hours, 0);
+        return {
+          ventureId: v.id,
+          name: v.name,
+          displayName: ventureDisplayName(v.name),
+          hours,
+          contributors,
+        };
+      })
       .sort((a, b) => b.hours - a.hours);
 
     // Heatmap: 5 weekdays (Mon–Fri) × 11 hours (8–18), counting check-ins.

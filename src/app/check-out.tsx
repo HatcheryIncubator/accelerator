@@ -43,8 +43,15 @@ export default function CheckOutScreen() {
     };
   }, [participant]);
 
+  const wordCount = notes.trim().split(/\s+/).filter(Boolean).length;
+  const noteRequired = wordCount < 3;
+
   async function confirmCheckOut() {
     if (!openSession) return;
+    if (noteRequired) {
+      setError('Please describe what you worked on in at least three words before checking out.');
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -52,7 +59,7 @@ export default function CheckOutScreen() {
         .from('sessions')
         .update({
           check_out_at: new Date().toISOString(),
-          notes: notes.trim() || null,
+          notes: notes.trim(),
         })
         .eq('id', openSession.id);
       if (updateError) throw updateError;
@@ -95,7 +102,7 @@ export default function CheckOutScreen() {
           />
 
           <Text style={styles.subtext}>
-            Closing this session will record your check-out time as now.
+            A note of at least three words is required to check out. Closing this session will record your check-out time as now.
           </Text>
 
           {error && <Text style={styles.error}>{error}</Text>}
@@ -105,7 +112,7 @@ export default function CheckOutScreen() {
               <ActivityIndicator color={colors.surface} />
             </View>
           ) : (
-            <PrimaryButton label="Confirm Check Out" onPress={confirmCheckOut} />
+            <PrimaryButton label="Confirm Check Out" onPress={confirmCheckOut} disabled={noteRequired} />
           )}
           <TextButton label="Cancel" onPress={() => router.replace('/home')} />
         </>

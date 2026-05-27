@@ -75,7 +75,7 @@ function DashboardContent({
         <HereNowCard items={data.hereNow} hero />
         <KpiStrip data={data} mobile />
         <QuietParticipantsCard items={data.quiet} collapsed />
-        <HoursByVentureChart title={hoursTitle} data={data.hoursByVenture} mobile />
+        <HoursByVentureChart title={hoursTitle} data={data.hoursByVenture} breakpoint={breakpoint} />
         <SessionsPerWeekChart data={data.sessionsPerWeek} />
         <ActivityHeatmap data={data.heatmap} compact />
       </>
@@ -87,7 +87,7 @@ function DashboardContent({
       <>
         <KpiStrip data={data} mobile={false} />
         <HereNowCard items={data.hereNow} />
-        <HoursByVentureChart title={hoursTitle} data={data.hoursByVenture} />
+        <HoursByVentureChart title={hoursTitle} data={data.hoursByVenture} breakpoint={breakpoint} />
         <SessionsPerWeekChart data={data.sessionsPerWeek} />
         <ActivityHeatmap data={data.heatmap} />
         <QuietParticipantsCard items={data.quiet} />
@@ -105,7 +105,7 @@ function DashboardContent({
           <QuietParticipantsCard items={data.quiet} />
         </View>
         <View style={styles.mainCol}>
-          <HoursByVentureChart title={hoursTitle} data={data.hoursByVenture} />
+          <HoursByVentureChart title={hoursTitle} data={data.hoursByVenture} breakpoint={breakpoint} />
           <View style={styles.subGrid}>
             <View style={styles.subCell}>
               <ActivityHeatmap data={data.heatmap} />

@@ -6,18 +6,22 @@ import type { PressableState } from '@/types';
 type PrimaryButtonProps = {
   label: string;
   onPress?: () => void;
+  disabled?: boolean;
 };
 
-export function PrimaryButton({ label, onPress }: PrimaryButtonProps) {
+export function PrimaryButton({ label, onPress, disabled = false }: PrimaryButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={onPress}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={disabled ? undefined : onPress}
       style={({ pressed, hovered }: PressableState) => [
         styles.button,
-        (pressed || (Platform.OS === 'web' && hovered)) && styles.active,
+        !disabled && (pressed || (Platform.OS === 'web' && hovered)) && styles.active,
+        disabled && styles.disabled,
       ]}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, disabled && styles.labelDisabled]}>{label}</Text>
     </Pressable>
   );
 }
@@ -34,8 +38,14 @@ const styles = StyleSheet.create({
   active: {
     backgroundColor: colors.blueDeep,
   },
+  disabled: {
+    backgroundColor: colors.border,
+  },
   label: {
     ...typography.button,
     color: colors.surface,
+  },
+  labelDisabled: {
+    color: colors.muted,
   },
 });
